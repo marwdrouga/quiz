@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<title>Κουίζ Πληροφορικής - Μέρος 3</title>
+
+<style>
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    padding: 30px;
+}
+
+.quiz-container {
+    background: #ffffff;
+    padding: 30px;
+    max-width: 750px;
+    margin: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.quiz-header {
+    margin-bottom: 20px;
+}
+
+.question-count {
+    color: #666;
+    font-size: 14px;
+}
+
+h2 {
+    color: #333;
+    margin-top: 10px;
+}
+
+button.answer-btn {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #f1f1f1;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button.answer-btn:hover {
+    background: #e0e7ff;
+}
+
+button.correct {
+    background: #4caf50;
+    color: white;
+}
+
+button.wrong {
+    background: #f44336;
+    color: white;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+#nextBtn {
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+}
+
+#nextBtn:hover {
+    background: #5a67d8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="quiz-container">
+    <div class="quiz-header">
+        <p class="question-count" id="questionCount"></p>
+        <h2 id="question"></h2>
+    </div>
+
+    <div id="answers"></div>
+
+    <button id="nextBtn" onclick="nextQuestion()">Επόμενη Ερώτηση</button>
+</div>
+
+<script>
+const quiz = [
+    {
+        q: "Ποια από τις παρακάτω είναι συσκευή εξόδου;",
+        a: ["Ποντίκι", "Σαρωτής", "Οθόνη", "Μικρόφωνο"],
+        c: 2
+    },
+    {
+        q: "Ποιος είναι ο βασικός ρόλος της ΚΜΕ (CPU);",
+        a: [
+            "Αποθήκευση δεδομένων",
+            "Εκτέλεση εντολών και επεξεργασία δεδομένων",
+            "Εμφάνιση εικόνων",
+            "Σύνδεση στο διαδίκτυο"
+        ],
+        c: 1
+    },
+    {
+        q: "Ποια μνήμη χάνει τα δεδομένα της όταν κλείσει ο υπολογιστής;",
+        a: ["ROM", "Σκληρός δίσκος", "USB", "RAM"],
+        c: 3
+    },
+    {
+        q: "Τι ονομάζουμε περιφερειακές συσκευές;",
+        a: [
+            "Μόνο τις εσωτερικές συσκευές",
+            "Τις συσκευές που συνδέονται στον υπολογιστή",
+            "Το λειτουργικό σύστημα",
+            "Τα προγράμματα"
+        ],
+        c: 1
+    },
+    {
+        q: "Ποιο από τα παρακάτω είναι λογισμικό εφαρμογών;",
+        a: ["Windows", "Linux", "Excel", "BIOS"],
+        c: 2
+    },
+    {
+        q: "Ποιος είναι ο ρόλος του λειτουργικού συστήματος;",
+        a: [
+            "Να παίζει μουσική",
+            "Να διαχειρίζεται το υλικό και τα προγράμματα",
+            "Να αποθηκεύει δεδομένα",
+            "Να δημιουργεί αρχεία"
+        ],
+        c: 1
+    },
+    {
+        q: "Ποια μονάδα μέτρησης χρησιμοποιείται για την ταχύτητα επεξεργαστή;",
+        a: ["Byte", "Hertz (Hz)", "Pixel", "Volt"],
+        c: 1
+    },
+    {
+        q: "Ποιο από τα παρακάτω είναι παράδειγμα υπηρεσίας ΤΠΕ;",
+        a: [
+            "Ηλεκτρονικό ταχυδρομείο (email)",
+            "Σκληρός δίσκος",
+            "Πληκτρολόγιο",
+            "Εκτυπωτής"
+        ],
+        c: 0
+    },
+    {
+        q: "Τι είναι το cloud computing;",
+        a: [
+            "Αποθήκευση δεδομένων σε φυσικό δίσκο",
+            "Χρήση υπηρεσιών μέσω διαδικτύου",
+            "Ένα είδος υπολογιστή",
+            "Ένα πρόγραμμα επεξεργασίας κειμένου"
+        ],
+        c: 1
+    },
+    {
+        q: "Ποιο είναι παράδειγμα εκπαιδευτικής χρήσης των υπολογιστών;",
+        a: [
+            "Διαδικτυακά μαθήματα",
+            "Ηλεκτρονικές αγορές",
+            "Διαφήμιση προϊόντων",
+            "Online τραπεζικές συναλλαγές"
+        ],
+        c: 0
+    }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+    answered = false;
+    document.getElementById("questionCount").innerText =
+        `Ερώτηση ${current + 1} / ${quiz.length}`;
+
+    document.getElementById("question").innerText = quiz[current].q;
+
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+
+    quiz[current].a.forEach((answer, index) => {
+        const btn = document.createElement("button");
+        btn.innerText = answer;
+        btn.className = "answer-btn";
+        btn.onclick = () => checkAnswer(btn, index);
+        answersDiv.appendChild(btn);
+    });
+}
+
+function checkAnswer(button, index) {
+    if (answered) return;
+    answered = true;
+
+    const buttons = document.querySelectorAll(".answer-btn");
+
+    buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === quiz[current].c) btn.classList.add("correct");
+        if (i === index && i !== quiz[current].c) btn.classList.add("wrong");
+    });
+
+    if (index === quiz[current].c) score++;
+}
+
+function nextQuestion() {
+    if (!answered) return;
+
+    current++;
+    if (current < quiz.length) {
+        loadQuestion();
+    } else {
+        document.querySelector(".quiz-container").innerHTML = `
+            <h2>🎉 Τέλος Κουίζ</h2>
+            <p>Σκορ: <strong>${score} / ${quiz.length}</strong></p>
+            <button id="nextBtn" onclick="location.reload()">Ξεκίνα ξανά</button>
+        `;
+    }
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
