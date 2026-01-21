@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<title>Κουίζ Πληροφορικής</title>
+ 
+<style>
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    padding: 30px;
+}
+
+.quiz-container {
+    background: #ffffff;
+    padding: 30px;
+    max-width: 750px;
+    margin: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.quiz-header {
+    margin-bottom: 20px;
+}
+
+.question-count {
+    color: #666;
+    font-size: 14px;
+}
+
+h2 {
+    color: #333;
+    margin-top: 10px;
+}
+
+button.answer-btn {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #f1f1f1;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button.answer-btn:hover {
+    background: #e0e7ff;
+}
+
+button.correct {
+    background: #4caf50;
+    color: white;
+}
+
+button.wrong {
+    background: #f44336;
+    color: white;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+#nextBtn {
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+}
+
+#nextBtn:hover {
+    background: #5a67d8;
+}
+
+#score {
+    margin-top: 15px;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="quiz-container">
+    <div class="quiz-header">
+        <p class="question-count" id="questionCount"></p>
+        <h2 id="question"></h2>
+    </div>
+
+    <div id="answers"></div>
+
+    <button id="nextBtn" onclick="nextQuestion()">Επόμενη Ερώτηση</button>
+    <p id="score"></p>
+</div>
+
+<script>
+const quiz = [
+  { q: "Τι παριστάνει το bit στους υπολογιστές;", a: ["Μια κατάσταση ρεύματος (0 ή 1)", "Έναν χαρακτήρα", "Μια ομάδα bytes", "Ένα αρχείο"], c: 0 },
+  { q: "Γιατί χρησιμοποιούμε πολλαπλάσια του byte;", a: ["Για λόγους ασφάλειας", "Για να αυξάνεται η ταχύτητα του επεξεργαστή", "Γιατί τα δεδομένα είναι πολλά", "Για να εκτελούνται τα προγράμματα"], c: 2 },
+  { q: "Πόσα bytes περιέχει 1 Megabyte (MB);", a: ["1.000 bytes", "1.048.576 bytes", "1024 bytes", "1.073.741.824 bytes"], c: 1 },
+  { q: "Τι μπορεί να θεωρηθεί δεδομένο σύμφωνα με το αρχείο;", a: ["Μόνο αριθμοί", "Λέξεις, αριθμοί, εικόνες και σύμβολα", "Μόνο κείμενο", "Μόνο προγράμματα"], c: 1 },
+  { q: "Τι προκύπτει όταν οργανώνουμε και επεξεργαζόμαστε τα δεδομένα;", a: ["Bits", "Bytes", "Αρχεία", "Πληροφορία"], c: 3 },
+  { q: "Ποια είναι εφαρμογή της Πληροφορικής στην Εκπαίδευση;", a: ["Πλατφόρμες τηλεκπαίδευσης", "Ηλεκτρονικό εμπόριο", "Τηλεϊατρική", "ERP συστήματα"], c: 0 },
+  { q: "Ποιος είναι ένας βασικός ρόλος της Πληροφορικής στις Επιχειρήσεις;", a: ["Η παραγωγή μουσικής", "Η διαχείριση δεδομένων και πωλήσεων", "Η ψυχαγωγία", "Η εκπαίδευση μαθητών"], c: 1 },
+  { q: "Τι επιτρέπει το cloud computing σύμφωνα με το αρχείο;", a: ["Αποθήκευση δεδομένων μόνο σε USB", "Χρήση μόνο τοπικών αρχείων", "Αποθήκευση και επεξεργασία μέσω διαδικτύου", "Επεξεργασία δεδομένων χωρίς υπολογιστή"], c: 2 },
+  { q: "Ποιο είναι ένα πλεονέκτημα των πλατφορμών ηλεκτρονικού εμπορίου;", a: ["Περιορισμός πελατών", "Πρόσβαση μόνο σε τοπικές αγορές", "Αύξηση εξόδων καταστήματος", "Πρόσβαση σε εθνικό και διεθνές κοινό"], c: 3 },
+  { q: "Πώς συμβάλλει η Πληροφορική στις Επιστήμες και την Έρευνα;", a: ["Με τη δημιουργία παιχνιδιών", "Με τη διαφήμιση", "Με την επεξεργασία μεγάλων όγκων δεδομένων", "Με την πώληση προϊόντων"], c: 2 }
+];
+
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+    answered = false;
+    document.getElementById("questionCount").innerText =
+        `Ερώτηση ${current + 1} / ${quiz.length}`;
+
+    document.getElementById("question").innerText = quiz[current].q;
+
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+
+    quiz[current].a.forEach((answer, index) => {
+        const btn = document.createElement("button");
+        btn.innerText = answer;
+        btn.className = "answer-btn";
+        btn.onclick = () => checkAnswer(btn, index);
+        answersDiv.appendChild(btn);
+    });
+}
+
+function checkAnswer(button, index) {
+    if (answered) return;
+    answered = true;
+
+    const buttons = document.querySelectorAll(".answer-btn");
+
+    buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === quiz[current].c) btn.classList.add("correct");
+        if (i === index && i !== quiz[current].c) btn.classList.add("wrong");
+    });
+
+    if (index === quiz[current].c) score++;
+}
+
+function nextQuestion() {
+    if (!answered) return;
+
+    current++;
+    if (current < quiz.length) {
+        loadQuestion();
+    } else {
+        document.querySelector(".quiz-container").innerHTML = `
+            <h2>🎉 Τέλος Κουίζ</h2>
+            <p>Σκορ: <strong>${score} / ${quiz.length}</strong></p>
+            <button id="nextBtn" onclick="location.reload()">Ξεκίνα ξανά</button>
+        `;
+    }
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
