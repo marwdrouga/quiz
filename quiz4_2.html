@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<title>Κουίζ Πληροφορικής</title>
+ 
+<style>
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    padding: 30px;
+}
+
+.quiz-container {
+    background: #ffffff;
+    padding: 30px;
+    max-width: 750px;
+    margin: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.quiz-header {
+    margin-bottom: 20px;
+}
+
+.question-count {
+    color: #666;
+    font-size: 14px;
+}
+
+h2 {
+    color: #333;
+    margin-top: 10px;
+}
+
+button.answer-btn {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #f1f1f1;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button.answer-btn:hover {
+    background: #e0e7ff;
+}
+
+button.correct {
+    background: #4caf50;
+    color: white;
+}
+
+button.wrong {
+    background: #f44336;
+    color: white;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+#nextBtn {
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+}
+
+#nextBtn:hover {
+    background: #5a67d8;
+}
+
+#score {
+    margin-top: 15px;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="quiz-container">
+    <div class="quiz-header">
+        <p class="question-count" id="questionCount"></p>
+        <h2 id="question"></h2>
+    </div>
+
+    <div id="answers"></div>
+
+    <button id="nextBtn" onclick="nextQuestion()">Επόμενη Ερώτηση</button>
+    <p id="score"></p>
+</div>
+
+<script>
+const quiz = [
+    { q: "Γιατί τα newsletters εξακολουθούν να θεωρούνται αποτελεσματικό εργαλείο ψηφιακού μάρκετινγκ;", a: ["Επειδή αντικαθιστούν τα social media", "Επειδή στέλνονται αυτόματα", "Επειδή προσφέρουν επιμελημένο και στοχευμένο περιεχόμενο", "Επειδή είναι δωρεάν"], c: 2 },
+    { q: "Ποιος είναι ο βασικός ρόλος του τίτλου σε ένα newsletter;", a: ["Να περιέχει πολλές λέξεις-κλειδιά", "Να τραβά άμεσα την προσοχή και να δημιουργεί περιέργεια", "Να είναι τυπικός και ουδέτερος", "Να περιγράφει αναλυτικά το περιεχόμενο"], c: 1 },
+    { q: "Τι επιτυγχάνουμε με την εξατομίκευση στο email marketing;", a: ["Αυξάνουμε την αίσθηση μαζικής επικοινωνίας", "Αποφεύγουμε τη χρήση γραφικών", "Μειώνουμε τον χρόνο συγγραφής", "Αυξάνουμε την αλληλεπίδραση και το άνοιγμα των emails"], c: 3 },
+    { q: "Ποιος είναι ο κύριος σκοπός των Call To Actions (CTAs);", a: ["Να αυξάνουν το μήκος του κειμένου", "Να αντικαθιστούν τον τίτλο", "Να διακοσμούν το newsletter", "Να δίνουν οδηγίες στον αναγνώστη για την επόμενη ενέργεια"], c: 3 },
+    { q: "Γιατί είναι σημαντικό να προσφέρεται αποκλειστικό περιεχόμενο στους συνδρομητές;", a: ["Για να δημιουργηθεί αίσθηση αξίας και προνομίου", "Για να αυξηθούν τα hashtags", "Για να μειωθεί το κόστος διαφήμισης", "Για να γεμίσει το newsletter με περισσότερο υλικό"], c: 0 },
+    { q: "Ποιος είναι ένας βασικός λόγος να είμαστε επιλεκτικοί με τους πελάτες ως freelancers;", a: ["Για να δεχόμαστε μόνο μεγάλες εταιρείες", "Για να αποφεύγουμε πελάτες που δεν σέβονται τη δουλειά μας", "Για να μην υπογράφουμε συμβόλαια", "Για να δουλεύουμε λιγότερες ώρες"], c: 1 },
+    { q: "Ποιος θεωρείται σοβαρός κίνδυνος στη συνεργασία με πελάτες;", a: ["Καθορισμένο εύρος εργασίας", "Γραπτό συμβόλαιο", "Υπερβολική σαφήνεια στους όρους", "Συχνές αλλαγές χωρίς αύξηση αμοιβής"], c: 3 },
+    { q: "Τι είναι πιο σημαντικό στην προώθηση περιεχομένου;", a: ["Η χρήση ίδιου μηνύματος παντού", "Η ποσότητα των δημοσιεύσεων", "Η ποιότητα και η στόχευση", "Ο αριθμός των links"], c: 2 },
+    { q: "Γιατί η συνάφεια των links είναι πιο σημαντική από τον αριθμό τους;", a: ["Γιατί τα πολλά links δεν επιτρέπονται", "Για να αυξάνεται το μήκος του άρθρου", "Για να μειώνεται το κόστος", "Γιατί οι μηχανές αναζήτησης αξιολογούν την ποιότητα και τη θεματολογική σχέση"], c: 3 },
+    { q: "Ποιο είναι ένα συνηθισμένο λάθος στο copywriting για social media;", a: ["Η ενθάρρυνση αλληλεπίδρασης", "Η χρήση ξεκάθαρης γλώσσας", "Η ίδια ακριβώς ανάρτηση σε όλες τις πλατφόρμες", "Η προσαρμογή περιεχομένου ανά πλατφόρμα"], c: 2 }
+];
+
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+    answered = false;
+    document.getElementById("questionCount").innerText =
+        `Ερώτηση ${current + 1} / ${quiz.length}`;
+
+    document.getElementById("question").innerText = quiz[current].q;
+
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+
+    quiz[current].a.forEach((answer, index) => {
+        const btn = document.createElement("button");
+        btn.innerText = answer;
+        btn.className = "answer-btn";
+        btn.onclick = () => checkAnswer(btn, index);
+        answersDiv.appendChild(btn);
+    });
+}
+
+function checkAnswer(button, index) {
+    if (answered) return;
+    answered = true;
+
+    const buttons = document.querySelectorAll(".answer-btn");
+
+    buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === quiz[current].c) btn.classList.add("correct");
+        if (i === index && i !== quiz[current].c) btn.classList.add("wrong");
+    });
+
+    if (index === quiz[current].c) score++;
+}
+
+function nextQuestion() {
+    if (!answered) return;
+
+    current++;
+    if (current < quiz.length) {
+        loadQuestion();
+    } else {
+        document.querySelector(".quiz-container").innerHTML = `
+            <h2>🎉 Τέλος Κουίζ</h2>
+            <p>Σκορ: <strong>${score} / ${quiz.length}</strong></p>
+            <button id="nextBtn" onclick="location.reload()">Ξεκίνα ξανά</button>
+        `;
+    }
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
