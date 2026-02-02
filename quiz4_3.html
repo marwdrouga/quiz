@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<title>Κουίζ Πληροφορικής</title>
+ 
+<style>
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    padding: 30px;
+}
+
+.quiz-container {
+    background: #ffffff;
+    padding: 30px;
+    max-width: 750px;
+    margin: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.quiz-header {
+    margin-bottom: 20px;
+}
+
+.question-count {
+    color: #666;
+    font-size: 14px;
+}
+
+h2 {
+    color: #333;
+    margin-top: 10px;
+}
+
+button.answer-btn {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #f1f1f1;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button.answer-btn:hover {
+    background: #e0e7ff;
+}
+
+button.correct {
+    background: #4caf50;
+    color: white;
+}
+
+button.wrong {
+    background: #f44336;
+    color: white;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+#nextBtn {
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+}
+
+#nextBtn:hover {
+    background: #5a67d8;
+}
+
+#score {
+    margin-top: 15px;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="quiz-container">
+    <div class="quiz-header">
+        <p class="question-count" id="questionCount"></p>
+        <h2 id="question"></h2>
+    </div>
+
+    <div id="answers"></div>
+
+    <button id="nextBtn" onclick="nextQuestion()">Επόμενη Ερώτηση</button>
+    <p id="score"></p>
+</div>
+
+<script>
+const quiz = [
+    { q: "Ποιος είναι ο βασικός λόγος που τα hashtags είναι χρήσιμα στο LinkedIn;", a: ["Για να αντικαθιστούν τον τίτλο", "Για να αυξάνουν την απήχηση σε σχετικό κοινό", "Για να γεμίζει το κείμενο", "Για να φαίνεται πιο επαγγελματικό"], c: 1 },
+    { q: "Ποια πρακτική βοηθά ώστε ένα κείμενο στο LinkedIn να είναι πιο ευανάγνωστο;", a: ["Έλλειψη δομής", "Συνεχής χρήση τεχνικής ορολογίας", "Μικρές παράγραφοι και bullets", "Μεγάλες και συμπαγείς παράγραφοι"], c: 2 },
+    { q: "Ποιο από τα παρακάτω θεωρείται λάθος στο LinkedIn;", a: ["Καθαρή δομή", "Μικρές παραγράφους", "Χρήση bullets", "Υπερβολικά προωθητικό και αυτοαναφορικό περιεχόμενο"], c: 3 },
+    { q: "Γιατί δεν προτείνεται η απλή αντιγραφή περιεχομένου από Facebook στο LinkedIn;", a: ["Γιατί το LinkedIn έχει διαφορετική επαγγελματική κουλτούρα", "Γιατί απαγορεύεται", "Γιατί μειώνει τα likes", "Γιατί δεν υποστηρίζεται τεχνικά"], c: 0 },
+    { q: "Ποιος είναι ο βασικός στόχος των πρώτων 3 δευτερολέπτων ενός TikTok βίντεο;", a: ["Να δοθεί όλη η πληροφορία", "Να τραβήξει άμεσα την προσοχή (hook)", "Να παρουσιαστεί ο δημιουργός", "Να μπει CTA"], c: 1 },
+    { q: "Ποιο από τα παρακάτω ΔΕΝ αποτελεί μέρος της κειμενογραφίας στο TikTok;", a: ["Το on-screen text", "Το προφορικό σενάριο", "Το βιογραφικό του δημιουργού", "Τα hashtags και το caption"], c: 2 },
+    { q: "Ποιος είναι ο ρόλος του CTA σε ένα TikTok βίντεο;", a: ["Να αντικαθιστά το hook", "Να καθοδηγεί τον θεατή σε ενέργεια", "Να αυξάνει τη διάρκεια", "Να διακοσμεί το τέλος"], c: 1 },
+    { q: "Ποιο χαρακτηριστικό κάνει το TikTok περιεχόμενο πιο αποτελεσματικό;", a: ["Μεγάλη διάρκεια", "Πολύ τεχνική ορολογία", "Αυθεντικότητα και απλότητα", "Τέλειο μοντάζ"], c: 2 },
+    { q: "Ποια είναι τα τέσσερα “U” ενός αποτελεσματικού τίτλου;", a: ["Urgent, Understandable, Unique, Useful", "Useful, Universal, User-friendly, Updated", "Ultra-fast, Useful, User-based, Unique", "Useful, Urgent, Unique, Ultra-specific"], c: 3 },
+    { q: "Ποιο θεωρείται το πιο σημαντικό “U” σύμφωνα με το υλικό;", a: ["Urgent", "Useful", "Unique", "Ultra-specific"], c: 1 }
+];
+
+
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+    answered = false;
+    document.getElementById("questionCount").innerText =
+        `Ερώτηση ${current + 1} / ${quiz.length}`;
+
+    document.getElementById("question").innerText = quiz[current].q;
+
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+
+    quiz[current].a.forEach((answer, index) => {
+        const btn = document.createElement("button");
+        btn.innerText = answer;
+        btn.className = "answer-btn";
+        btn.onclick = () => checkAnswer(btn, index);
+        answersDiv.appendChild(btn);
+    });
+}
+
+function checkAnswer(button, index) {
+    if (answered) return;
+    answered = true;
+
+    const buttons = document.querySelectorAll(".answer-btn");
+
+    buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === quiz[current].c) btn.classList.add("correct");
+        if (i === index && i !== quiz[current].c) btn.classList.add("wrong");
+    });
+
+    if (index === quiz[current].c) score++;
+}
+
+function nextQuestion() {
+    if (!answered) return;
+
+    current++;
+    if (current < quiz.length) {
+        loadQuestion();
+    } else {
+        document.querySelector(".quiz-container").innerHTML = `
+            <h2>🎉 Τέλος Κουίζ</h2>
+            <p>Σκορ: <strong>${score} / ${quiz.length}</strong></p>
+            <button id="nextBtn" onclick="location.reload()">Ξεκίνα ξανά</button>
+        `;
+    }
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
