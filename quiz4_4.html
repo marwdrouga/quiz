@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<title>Κουίζ Πληροφορικής</title>
+ 
+<style>
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    padding: 30px;
+}
+
+.quiz-container {
+    background: #ffffff;
+    padding: 30px;
+    max-width: 750px;
+    margin: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.quiz-header {
+    margin-bottom: 20px;
+}
+
+.question-count {
+    color: #666;
+    font-size: 14px;
+}
+
+h2 {
+    color: #333;
+    margin-top: 10px;
+}
+
+button.answer-btn {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #f1f1f1;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button.answer-btn:hover {
+    background: #e0e7ff;
+}
+
+button.correct {
+    background: #4caf50;
+    color: white;
+}
+
+button.wrong {
+    background: #f44336;
+    color: white;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+#nextBtn {
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+}
+
+#nextBtn:hover {
+    background: #5a67d8;
+}
+
+#score {
+    margin-top: 15px;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="quiz-container">
+    <div class="quiz-header">
+        <p class="question-count" id="questionCount"></p>
+        <h2 id="question"></h2>
+    </div>
+
+    <div id="answers"></div>
+
+    <button id="nextBtn" onclick="nextQuestion()">Επόμενη Ερώτηση</button>
+    <p id="score"></p>
+</div>
+
+<script>
+const quiz = [
+{ q: "Ποιος είναι ο βασικός στόχος μιας επικεφαλίδας (τίτλου);", a: ["Να είναι εντυπωσιακή ανεξαρτήτως περιεχομένου", "Να τραβά την προσοχή και να δείχνει τι θα βρει ο αναγνώστης", "Να περιέχει όσο το δυνατόν περισσότερες πληροφορίες", "Να είναι χιουμοριστική"], c: 1 },
+{ q: "Γιατί η παραπλάνηση σε τίτλους θεωρείται λανθασμένη πρακτική;", a: ["Γιατί μειώνει το SEO", "Γιατί κουράζει οπτικά", "Γιατί απογοητεύει τον αναγνώστη και χάνει την εμπιστοσύνη του", "Γιατί απαγορεύεται από τις πλατφόρμες"], c: 2 },
+{ q: "Τι πρέπει να φαίνεται ξεκάθαρα στον τίτλο σύμφωνα με το υλικό;", a: ["Το όνομα της εταιρείας", "Η τιμή του προϊόντος", "Όλα τα χαρακτηριστικά του προϊόντος", "Το βασικό όφελος για τον αναγνώστη"], c: 3 },
+{ q: "Γιατί οι τίτλοι που ξεκινούν με «Πώς να…» είναι αποτελεσματικοί;", a: ["Επειδή υπόσχονται γνώση και πρακτική λύση", "Επειδή είναι πιο μεγάλοι", "Επειδή χρησιμοποιούνται μόνο στο SEO", "Επειδή είναι πιο επίσημοι"], c: 0 },
+{ q: "Ποιο είναι το βασικό πλεονέκτημα της χρήσης της λέξης «εσύ» στον τίτλο;", a: ["Κάνει τον τίτλο πιο σύντομο", "Βελτιώνει την ορθογραφία", "Κάνει την επικοινωνία πιο προσωπική", "Μειώνει τον ανταγωνισμό"], c: 2 },
+{ q: "Ποιος είναι ο ρόλος της έντονης γραφής και των χρωμάτων στους τίτλους;", a: ["Να αντικαθιστούν το περιεχόμενο", "Να κάνουν το κείμενο πιο μακροσκελές", "Να δείχνουν μόνο πιο επαγγελματικό το site", "Να τραβούν το μάτι και να διευκολύνουν την ανάγνωση"], c: 3 },
+{ q: "Τι είναι ένα Call to Action (CTA);", a: ["Μια προτροπή που καθοδηγεί τον αναγνώστη σε ενέργεια", "Ένα είδος τίτλου", "Ένα διαφημιστικό σλόγκαν", "Μια επικεφαλίδα άρθρου"], c: 0 },
+{ q: "Ποιο από τα παρακάτω είναι παράδειγμα CTA;", a: ["Πώς γράφουμε τίτλους", "Τι είναι το blogging", "Διαβάστε περισσότερα άρθρα", "Η ιστορία του copywriting"], c: 2 },
+{ q: "Ποια είναι βασική διαφορά marketing copywriter και απλού copywriter;", a: ["Ο marketing copywriter δεν ασχολείται με πωλήσεις", "Ο marketing copywriter έχει στρατηγικό ρόλο και γνώση digital marketing", "Ο απλός copywriter δεν γράφει τίτλους", "Ο marketing copywriter γράφει λιγότερα κείμενα"], c: 1 },
+{ q: "Ποιος είναι βασικός στόχος της στρατηγικής συγγραφής blog;", a: ["Να γράφονται μεγάλα κείμενα", "Να δημοσιεύονται πολλά άρθρα", "Να χρησιμοποιούνται μόνο εικόνες", "Να δημιουργείται περιεχόμενο με συγκεκριμένο σκοπό και αποτέλεσμα"], c: 3 }
+];
+
+
+
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+    answered = false;
+    document.getElementById("questionCount").innerText =
+        `Ερώτηση ${current + 1} / ${quiz.length}`;
+
+    document.getElementById("question").innerText = quiz[current].q;
+
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+
+    quiz[current].a.forEach((answer, index) => {
+        const btn = document.createElement("button");
+        btn.innerText = answer;
+        btn.className = "answer-btn";
+        btn.onclick = () => checkAnswer(btn, index);
+        answersDiv.appendChild(btn);
+    });
+}
+
+function checkAnswer(button, index) {
+    if (answered) return;
+    answered = true;
+
+    const buttons = document.querySelectorAll(".answer-btn");
+
+    buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === quiz[current].c) btn.classList.add("correct");
+        if (i === index && i !== quiz[current].c) btn.classList.add("wrong");
+    });
+
+    if (index === quiz[current].c) score++;
+}
+
+function nextQuestion() {
+    if (!answered) return;
+
+    current++;
+    if (current < quiz.length) {
+        loadQuestion();
+    } else {
+        document.querySelector(".quiz-container").innerHTML = `
+            <h2>🎉 Τέλος Κουίζ</h2>
+            <p>Σκορ: <strong>${score} / ${quiz.length}</strong></p>
+            <button id="nextBtn" onclick="location.reload()">Ξεκίνα ξανά</button>
+        `;
+    }
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
