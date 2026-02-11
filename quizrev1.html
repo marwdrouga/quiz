@@ -35,39 +35,25 @@ h2 {
     margin-top: 10px;
 }
 
-button.answer-btn {
+label {
     display: block;
-    width: 100%;
     margin: 8px 0;
-    padding: 12px;
-    font-size: 16px;
-    border: none;
+    padding: 10px;
     border-radius: 8px;
     background: #f1f1f1;
     cursor: pointer;
     transition: 0.3s;
 }
 
-button.answer-btn:hover {
+input[type="radio"], input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+label:hover {
     background: #e0e7ff;
 }
 
-button.correct {
-    background: #4caf50;
-    color: white;
-}
-
-button.wrong {
-    background: #f44336;
-    color: white;
-}
-
-button:disabled {
-    cursor: not-allowed;
-    opacity: 0.9;
-}
-
-#nextBtn {
+button#nextBtn {
     margin-top: 20px;
     padding: 12px;
     font-size: 16px;
@@ -79,7 +65,7 @@ button:disabled {
     width: 100%;
 }
 
-#nextBtn:hover {
+button#nextBtn:hover {
     background: #5a67d8;
 }
 
@@ -180,8 +166,6 @@ const quiz = [
   }
 ];
 
-
-
 let current = 0;
 let score = 0;
 let answered = false;
@@ -190,39 +174,71 @@ function loadQuestion() {
     answered = false;
     document.getElementById("questionCount").innerText =
         `Ερώτηση ${current + 1} / ${quiz.length}`;
-
     document.getElementById("question").innerText = quiz[current].q;
 
     const answersDiv = document.getElementById("answers");
     answersDiv.innerHTML = "";
 
+    const isMulti = Array.isArray(quiz[current].c);
+
     quiz[current].a.forEach((answer, index) => {
-        const btn = document.createElement("button");
-        btn.innerText = answer;
-        btn.className = "answer-btn";
-        btn.onclick = () => checkAnswer(btn, index);
-        answersDiv.appendChild(btn);
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = isMulti ? "checkbox" : "radio";
+        input.name = "answer";
+        input.value = index;
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(" " + answer));
+        answersDiv.appendChild(label);
     });
 }
 
-function checkAnswer(button, index) {
-    if (answered) return;
-    answered = true;
-
-    const buttons = document.querySelectorAll(".answer-btn");
-
-    buttons.forEach((btn, i) => {
-        btn.disabled = true;
-        if (i === quiz[current].c) btn.classList.add("correct");
-        if (i === index && i !== quiz[current].c) btn.classList.add("wrong");
+function checkAnswer() {
+    if(answered) return;
+    const inputs = document.querySelectorAll('#answers input');
+    let selected = [];
+    inputs.forEach(input => {
+        if(input.checked) selected.push(parseInt(input.value));
+        input.disabled = true;
     });
 
-    if (index === quiz[current].c) score++;
+    const correctAnswers = quiz[current].c;
+    let isCorrect;
+
+    if(Array.isArray(correctAnswers)) {
+        isCorrect = selected.length === correctAnswers.length && selected.every(val => correctAnswers.includes(val));
+    } else {
+        isCorrect = selected[0] === correctAnswers;
+    }
+
+    if(isCorrect) score++;
+
+    inputs.forEach(input => {
+        const parentLabel = input.parentElement;
+        if(Array.isArray(correctAnswers)) {
+            if(correctAnswers.includes(parseInt(input.value))) {
+                parentLabel.style.backgroundColor = "#4caf50";
+                parentLabel.style.color = "white";
+            } else if(input.checked) {
+                parentLabel.style.backgroundColor = "#f44336";
+                parentLabel.style.color = "white";
+            }
+        } else {
+            if(parseInt(input.value) === correctAnswers) {
+                parentLabel.style.backgroundColor = "#4caf50";
+                parentLabel.style.color = "white";
+            } else if(input.checked) {
+                parentLabel.style.backgroundColor = "#f44336";
+                parentLabel.style.color = "white";
+            }
+        }
+    });
+
+    answered = true;
 }
 
 function nextQuestion() {
-    if (!answered) return;
-
+    checkAnswer();
     current++;
     if (current < quiz.length) {
         loadQuestion();
