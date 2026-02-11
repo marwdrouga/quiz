@@ -35,22 +35,24 @@ h2 {
     margin-top: 10px;
 }
 
-label {
+#answers label {
     display: block;
+    width: 100%;
     margin: 8px 0;
-    padding: 10px;
+    padding: 12px;
+    font-size: 16px;
     border-radius: 8px;
     background: #f1f1f1;
     cursor: pointer;
     transition: 0.3s;
 }
 
-input[type="radio"], input[type="checkbox"] {
-    margin-right: 10px;
+#answers label:hover {
+    background: #e0e7ff;
 }
 
-label:hover {
-    background: #e0e7ff;
+#answers input {
+    margin-right: 10px;
 }
 
 button#nextBtn {
@@ -172,14 +174,13 @@ let answered = false;
 
 function loadQuestion() {
     answered = false;
+    const isMulti = Array.isArray(quiz[current].c);
     document.getElementById("questionCount").innerText =
         `Ερώτηση ${current + 1} / ${quiz.length}`;
     document.getElementById("question").innerText = quiz[current].q;
 
     const answersDiv = document.getElementById("answers");
     answersDiv.innerHTML = "";
-
-    const isMulti = Array.isArray(quiz[current].c);
 
     quiz[current].a.forEach((answer, index) => {
         const label = document.createElement("label");
@@ -190,57 +191,72 @@ function loadQuestion() {
         label.appendChild(input);
         label.appendChild(document.createTextNode(" " + answer));
         answersDiv.appendChild(label);
+
+        if(!isMulti){
+            label.onclick = () => checkAnswer(index);
+        } else {
+            input.onchange = () => checkAnswerMulti();
+        }
     });
 }
 
-function checkAnswer() {
+function checkAnswer(selectedIndex){
     if(answered) return;
+    answered = true;
+
+    const buttons = document.querySelectorAll('#answers input');
+    buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        const label = btn.parentElement;
+        if(i === quiz[current].c){
+            label.style.backgroundColor = "#4caf50";
+            label.style.color = "white";
+        }
+        if(i === selectedIndex && i !== quiz[current].c){
+            label.style.backgroundColor = "#f44336";
+            label.style.color = "white";
+        }
+    });
+
+    if(selectedIndex === quiz[current].c) score++;
+}
+
+function checkAnswerMulti(){
     const inputs = document.querySelectorAll('#answers input');
     let selected = [];
     inputs.forEach(input => {
         if(input.checked) selected.push(parseInt(input.value));
-        input.disabled = true;
     });
 
     const correctAnswers = quiz[current].c;
-    let isCorrect;
-
-    if(Array.isArray(correctAnswers)) {
-        isCorrect = selected.length === correctAnswers.length && selected.every(val => correctAnswers.includes(val));
-    } else {
-        isCorrect = selected[0] === correctAnswers;
-    }
-
-    if(isCorrect) score++;
+    const allCorrectSelected = selected.length === correctAnswers.length && selected.every(val => correctAnswers.includes(val));
 
     inputs.forEach(input => {
-        const parentLabel = input.parentElement;
-        if(Array.isArray(correctAnswers)) {
-            if(correctAnswers.includes(parseInt(input.value))) {
-                parentLabel.style.backgroundColor = "#4caf50";
-                parentLabel.style.color = "white";
-            } else if(input.checked) {
-                parentLabel.style.backgroundColor = "#f44336";
-                parentLabel.style.color = "white";
-            }
+        const label = input.parentElement;
+        if(correctAnswers.includes(parseInt(input.value))) {
+            label.style.backgroundColor = allCorrectSelected ? "#4caf50" : "";
+            label.style.color = allCorrectSelected ? "white" : "";
+        } else if(input.checked){
+            label.style.backgroundColor = "#f44336";
+            label.style.color = "white";
         } else {
-            if(parseInt(input.value) === correctAnswers) {
-                parentLabel.style.backgroundColor = "#4caf50";
-                parentLabel.style.color = "white";
-            } else if(input.checked) {
-                parentLabel.style.backgroundColor = "#f44336";
-                parentLabel.style.color = "white";
-            }
+            label.style.backgroundColor = "";
+            label.style.color = "";
         }
     });
 
-    answered = true;
+    if(allCorrectSelected){
+        answered = true;
+        score++;
+        inputs.forEach(input => input.disabled = true);
+    }
 }
 
 function nextQuestion() {
-    checkAnswer();
+    if(!answered) return;
+
     current++;
-    if (current < quiz.length) {
+    if(current < quiz.length){
         loadQuestion();
     } else {
         document.querySelector(".quiz-container").innerHTML = `
