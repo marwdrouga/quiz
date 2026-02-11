@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<title>Κουίζ Πληροφορικής</title>
+ 
+<style>
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    padding: 30px;
+}
+
+.quiz-container {
+    background: #ffffff;
+    padding: 30px;
+    max-width: 750px;
+    margin: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.quiz-header {
+    margin-bottom: 20px;
+}
+
+.question-count {
+    color: #666;
+    font-size: 14px;
+}
+
+h2 {
+    color: #333;
+    margin-top: 10px;
+}
+
+button.answer-btn {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #f1f1f1;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button.answer-btn:hover {
+    background: #e0e7ff;
+}
+
+button.correct {
+    background: #4caf50;
+    color: white;
+}
+
+button.wrong {
+    background: #f44336;
+    color: white;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+#nextBtn {
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+}
+
+#nextBtn:hover {
+    background: #5a67d8;
+}
+
+#score {
+    margin-top: 15px;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="quiz-container">
+    <div class="quiz-header">
+        <p class="question-count" id="questionCount"></p>
+        <h2 id="question"></h2>
+    </div>
+
+    <div id="answers"></div>
+
+    <button id="nextBtn" onclick="nextQuestion()">Επόμενη Ερώτηση</button>
+    <p id="score"></p>
+</div>
+
+<script>
+const quiz = [
+{ q: "Τι μας επιτρέπει να κατανοήσουμε η ανάλυση της συμπεριφοράς των χρηστών;", a: ["Αν το site έχει μοντέρνο σχεδιασμό", "Πώς κινούνται οι επισκέπτες μέσα στο site και πού σταματούν", "Πόσες λέξεις έχει κάθε σελίδα", "Πόσοι ανταγωνιστές υπάρχουν στην αγορά"], c: 1 },
+{ q: "Γιατί είναι σημαντικό να μετράμε τις μετατροπές και όχι μόνο την επισκεψιμότητα;", a: ["Γιατί η επισκεψιμότητα δεν δείχνει αν πετυχαίνουμε τον στόχο μας", "Γιατί οι επισκέπτες δεν έχουν σημασία", "Γιατί μειώνει το κόστος διαφήμισης", "Γιατί αυξάνει το SEO"], c: 0 },
+{ q: "Ποιος είναι ο βασικός λόγος αποφυγής του keyword stuffing;", a: ["Γιατί μειώνει την ταχύτητα του site", "Γιατί κάνει το κείμενο πιο σύντομο", "Γιατί μπορεί να επηρεάσει αρνητικά την κατάταξη στις μηχανές αναζήτησης", "Γιατί αυξάνει το bounce rate"], c: 2 },
+{ q: "Τι σημαίνει ότι ένα site είναι βελτιστοποιημένο για μηχανές αναζήτησης;", a: ["Έχει πολλές εικόνες", "Χρησιμοποιεί σωστά λέξεις-κλειδιά και δομή περιεχομένου", "Έχει έντονα χρώματα", "Έχει μεγάλο αριθμό σελίδων"], c: 1 },
+{ q: "Αν το Bounce Rate είναι πολύ υψηλό σε κάποιες σελίδες, τι σημαίνει;", a: ["Οι χρήστες φεύγουν χωρίς να κάνουν κάποια ενέργεια", "Οι χρήστες αγοράζουν αμέσως", "Οι χρήστες γεμίζουν πολλές φόρμες", "Οι χρήστες μοιράζονται το περιεχόμενο"], c: 0 },
+{ q: "Αν οι μετατροπές είναι χαμηλές, τι πρέπει να αναλύσουμε;", a: ["Το χρώμα του λογότυπου", "Τον αριθμό των social media followers", "Την εμπειρία του χρήστη και τη διαδρομή αγοράς/εγγραφής", "Τον αριθμό των ανταγωνιστών"], c: 2 },
+{ q: "Ποιος είναι ο δεύτερος στόχος ενός copywriter πέρα από το να πείσει τους ανθρώπους;", a: ["Να γράφει μεγάλα κείμενα", "Να αποφεύγει τελείως τις λέξεις-κλειδιά", "Να χρησιμοποιεί δύσκολες λέξεις", "Να γράφει και για τις μηχανές αναζήτησης (crawlers)"], c: 3 },
+{ q: "Τι κάνουν οι crawlers των μηχανών αναζήτησης;", a: ["Απαντούν σε email", "Διαβάζουν και καταγράφουν το περιεχόμενο των σελίδων", "Σχεδιάζουν ιστοσελίδες", "Δημιουργούν διαφημίσεις"], c: 1 },
+{ q: "Τι είναι η SERP;", a: ["Η διαδικασία τοποθέτησης λέξεων-κλειδιών", "Ο αλγόριθμος της Google", "Η σελίδα αποτελεσμάτων μηχανής αναζήτησης", "Το εργαλείο εύρεσης λέξεων-κλειδιών"], c: 2 },
+{ q: "Τι είναι το “keyword stuffing”;", a: ["Η φυσική ενσωμάτωση λέξεων-κλειδιών", "Η στρατηγική επιλογή λέξεων-κλειδιών", "Η έρευνα λέξεων-κλειδιών", "Η υπερβολική και αφύσικη επανάληψη λέξεων-κλειδιών"], c: 3 }
+];
+
+
+
+
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+    answered = false;
+    document.getElementById("questionCount").innerText =
+        `Ερώτηση ${current + 1} / ${quiz.length}`;
+
+    document.getElementById("question").innerText = quiz[current].q;
+
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+
+    quiz[current].a.forEach((answer, index) => {
+        const btn = document.createElement("button");
+        btn.innerText = answer;
+        btn.className = "answer-btn";
+        btn.onclick = () => checkAnswer(btn, index);
+        answersDiv.appendChild(btn);
+    });
+}
+
+function checkAnswer(button, index) {
+    if (answered) return;
+    answered = true;
+
+    const buttons = document.querySelectorAll(".answer-btn");
+
+    buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === quiz[current].c) btn.classList.add("correct");
+        if (i === index && i !== quiz[current].c) btn.classList.add("wrong");
+    });
+
+    if (index === quiz[current].c) score++;
+}
+
+function nextQuestion() {
+    if (!answered) return;
+
+    current++;
+    if (current < quiz.length) {
+        loadQuestion();
+    } else {
+        document.querySelector(".quiz-container").innerHTML = `
+            <h2>🎉 Τέλος Κουίζ</h2>
+            <p>Σκορ: <strong>${score} / ${quiz.length}</strong></p>
+            <button id="nextBtn" onclick="location.reload()">Ξεκίνα ξανά</button>
+        `;
+    }
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
