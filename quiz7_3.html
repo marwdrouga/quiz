@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<title>Κουίζ Πληροφορικής</title>
+ 
+<style>
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    padding: 30px;
+}
+
+.quiz-container {
+    background: #ffffff;
+    padding: 30px;
+    max-width: 750px;
+    margin: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.quiz-header {
+    margin-bottom: 20px;
+}
+
+.question-count {
+    color: #666;
+    font-size: 14px;
+}
+
+h2 {
+    color: #333;
+    margin-top: 10px;
+}
+
+button.answer-btn {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #f1f1f1;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button.answer-btn:hover {
+    background: #e0e7ff;
+}
+
+button.correct {
+    background: #4caf50;
+    color: white;
+}
+
+button.wrong {
+    background: #f44336;
+    color: white;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+#nextBtn {
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+}
+
+#nextBtn:hover {
+    background: #5a67d8;
+}
+
+#score {
+    margin-top: 15px;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="quiz-container">
+    <div class="quiz-header">
+        <p class="question-count" id="questionCount"></p>
+        <h2 id="question"></h2>
+    </div>
+
+    <div id="answers"></div>
+
+    <button id="nextBtn" onclick="nextQuestion()">Επόμενη Ερώτηση</button>
+    <p id="score"></p>
+</div>
+
+<script>
+const quiz = [
+  { q: "Τι είναι οι λέξεις-κλειδιά Long Tail?", a: ["Φράσεις με περισσότερες λέξεις, πιο αναλυτικές και εξειδικευμένες", "Λέξεις-κλειδιά που χρησιμοποιούνται μόνο σε διαφημίσεις", "Λέξεις-κλειδιά με πολύ υψηλό όγκο αναζητήσεων", "Μονολεκτικές γενικές έννοιες"], c: 0 },
+  { q: "Ποιο από τα παρακάτω αποτελεί παράδειγμα Long Tail λέξης-κλειδιού?", a: ["Κάμερα", "Laptop", "Αδιάβροχα παπούτσια για πεζοπορία για άνδρες με μεγάλο νούμερο", "Παπούτσια"], c: 2 },
+  { q: "Γιατί οι Long Tail λέξεις-κλειδιά έχουν μικρότερο ανταγωνισμό?", a: ["Επειδή δεν τις χρησιμοποιεί κανείς", "Επειδή είναι πιο σύντομες", "Επειδή είναι πιο εξειδικευμένες και λιγότερες επιχειρήσεις τις στοχεύουν", "Επειδή η Google δεν τις αναγνωρίζει"], c: 1 },
+  { q: "Ποιο είναι ένα βασικό χαρακτηριστικό των Long Tail λέξεων-κλειδιών?", a: ["Χρησιμοποιούνται μόνο σε blog", "Έχουν πάντα πάνω από 100.000 αναζητήσεις τον μήνα", "Είναι πάντα μία λέξη", "Συνήθως αποτελούνται από περισσότερες από τρεις λέξεις"], c: 3 },
+  { q: "Τι σημαίνει «υψηλότερη μετατροπή» σε σχέση με τις Long Tail λέξεις-κλειδιά?", a: ["Περισσότερα likes στα social media", "Μεγαλύτερη πιθανότητα οι επισκέπτες να γίνουν πελάτες", "Περισσότερα σχόλια στη σελίδα", "Περισσότερες γενικές επισκέψεις χωρίς αγορές"], c: 1 },
+  { q: "Όταν όλες οι Long Tail αναζητήσεις συνδυαστούν, περίπου τι ποσοστό των συνολικών αναζητήσεων στο διαδίκτυο αποτελούν?", a: ["70%", "30%", "10%", "50%"], c: 0 },
+  { q: "Πού πρέπει να τοποθετούνται στρατηγικά οι Long Tail λέξεις-κλειδιά?", a: ["Μόνο σε κρυφό κείμενο", "Μόνο στο footer της σελίδας", "Σε τίτλους, περιγραφές, μετα-περιγραφές και κείμενο σελίδας", "Μόνο στις εικόνες"], c: 2 },
+  { q: "Τι μπορεί να συμβεί αν εφαρμόσετε keyword stuffing στην ιστοσελίδα σας?", a: ["Θα εμφανίζεστε μόνο σε Long Tail αναζητήσεις", "Η Google θα αυξήσει άμεσα την κατάταξή σας", "Η Google μπορεί να μειώσει την κατάταξή σας ή να σας αφαιρέσει από τα αποτελέσματα", "Θα αυξηθεί αυτόματα η επισκεψιμότητα"], c: 3 },
+  { q: "Ποιος είναι ο «χρυσός κανόνας» στη χρήση λέξεων-κλειδιών?", a: ["Ποιότητα αντί για ποσότητα", "Όσο περισσότερες, τόσο καλύτερα", "Να επαναλαμβάνονται σε κάθε πρόταση", "Να τοποθετούνται μόνο στον τίτλο"], c: 0 },
+  { q: "Ποια είναι η σωστή σειρά κατά τη συγγραφή περιεχομένου?", a: ["Πρώτα η πυκνότητα λέξεων-κλειδιών", "Πρώτα οι μετα-περιγραφές, μετά το κείμενο", "Πρώτα η ποιότητα και η εμπειρία χρήστη, μετά το SEO", "Πρώτα οι λέξεις-κλειδιά, μετά το νόημα"], c: 1 }
+];
+
+
+
+
+
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+    answered = false;
+    document.getElementById("questionCount").innerText =
+        `Ερώτηση ${current + 1} / ${quiz.length}`;
+
+    document.getElementById("question").innerText = quiz[current].q;
+
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+
+    quiz[current].a.forEach((answer, index) => {
+        const btn = document.createElement("button");
+        btn.innerText = answer;
+        btn.className = "answer-btn";
+        btn.onclick = () => checkAnswer(btn, index);
+        answersDiv.appendChild(btn);
+    });
+}
+
+function checkAnswer(button, index) {
+    if (answered) return;
+    answered = true;
+
+    const buttons = document.querySelectorAll(".answer-btn");
+
+    buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === quiz[current].c) btn.classList.add("correct");
+        if (i === index && i !== quiz[current].c) btn.classList.add("wrong");
+    });
+
+    if (index === quiz[current].c) score++;
+}
+
+function nextQuestion() {
+    if (!answered) return;
+
+    current++;
+    if (current < quiz.length) {
+        loadQuestion();
+    } else {
+        document.querySelector(".quiz-container").innerHTML = `
+            <h2>🎉 Τέλος Κουίζ</h2>
+            <p>Σκορ: <strong>${score} / ${quiz.length}</strong></p>
+            <button id="nextBtn" onclick="location.reload()">Ξεκίνα ξανά</button>
+        `;
+    }
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
