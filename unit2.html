@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Κουίζ - Κειμενογράφος Ψηφιακού Περιεχομένου</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    color: white;
+    margin-bottom: 50px;
+}
+
+.header h1 {
+    font-size: 48px;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.header p {
+    font-size: 20px;
+    opacity: 0.9;
+}
+
+.quiz-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.quiz-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.quiz-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+.quiz-icon {
+    font-size: 50px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.quiz-card h2 {
+    color: #667eea;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+
+
+.quiz-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.questions-count {
+    color: #999;
+    font-size: 14px;
+}
+
+.start-btn {
+    background: #667eea;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.quiz-card:hover .start-btn {
+    background: #5a67d8;
+}
+
+.add-quiz-card {
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    border: 3px dashed #667eea;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 250px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.add-quiz-card:hover {
+    background: linear-gradient(135deg, #e8ecf1, #b8c6db);
+    border-color: #5a67d8;
+}
+
+.add-icon {
+    font-size: 60px;
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.add-quiz-card h3 {
+    color: #667eea;
+    font-size: 20px;
+}
+
+.footer {
+    text-align: center;
+    color: white;
+    margin-top: 50px;
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 32px;
+    }
+    
+    .quiz-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>🎓 Κουίζ – 1η Ενότητα</h1>
+</div>
+
+    <div class="quiz-grid">
+        <!-- Κουίζ 1 -->
+        <a href="quiz2_1.html" class="quiz-card">
+            <div class="quiz-icon">💻</div>
+            <h2>Κουίζ 1</h2>
+            <div class="quiz-meta">
+                <span class="questions-count">📝 10 ερωτήσεις</span>
+                <span class="start-btn">Ξεκίνα →</span>
+            </div>
+        </a>
+
+        <!-- Κουίζ 2 -->
+        <a href="quiz2_2.html" class="quiz-card">
+            <div class="quiz-icon">🚀</div>
+            <h2>Κουίζ 2</h2>
+            <div class="quiz-meta">
+                <span class="questions-count">📝 10 ερωτήσεις</span>
+                <span class="start-btn">Ξεκίνα →</span>
+            </div>
+        </a>
+
+
+         <!-- Κουίζ 3 -->
+        <a href="quiz2_3.html" class="quiz-card">
+            <div class="quiz-icon">💡</div>
+            <h2>Κουίζ 3</h2>
+            <div class="quiz-meta">
+                <span class="questions-count">📝 10 ερωτήσεις</span>
+                <span class="start-btn">Ξεκίνα →</span>
+            </div>
+        </a>
+
+
+    
+
+        
+
+    <div class="footer">
+        <p>© 2026 Μαρία Δρούγκα | Φτιαγμένο με ❤️</p>
+    </div>
+</div>
+
+</body>
+</html>
+
