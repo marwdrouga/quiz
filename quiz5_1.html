@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<title>Κουίζ Πληροφορικής</title>
+ 
+<style>
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    padding: 30px;
+}
+
+.quiz-container {
+    background: #ffffff;
+    padding: 30px;
+    max-width: 750px;
+    margin: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.quiz-header {
+    margin-bottom: 20px;
+}
+
+.question-count {
+    color: #666;
+    font-size: 14px;
+}
+
+h2 {
+    color: #333;
+    margin-top: 10px;
+}
+
+button.answer-btn {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #f1f1f1;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button.answer-btn:hover {
+    background: #e0e7ff;
+}
+
+button.correct {
+    background: #4caf50;
+    color: white;
+}
+
+button.wrong {
+    background: #f44336;
+    color: white;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+#nextBtn {
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+}
+
+#nextBtn:hover {
+    background: #5a67d8;
+}
+
+#score {
+    margin-top: 15px;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="quiz-container">
+    <div class="quiz-header">
+        <p class="question-count" id="questionCount"></p>
+        <h2 id="question"></h2>
+    </div>
+
+    <div id="answers"></div>
+
+    <button id="nextBtn" onclick="nextQuestion()">Επόμενη Ερώτηση</button>
+    <p id="score"></p>
+</div>
+
+<script>
+const quiz = [
+{ q: "Ποιο από τα παρακάτω ΔΕΝ αποτελεί στοιχείο ενός Buyer Persona;", a: ["Χρηματιστηριακό χαρτοφυλάκιο", "Αγοραστικά κίνητρα", "Δημογραφικά στοιχεία", "Ψυχογραφικά στοιχεία"], c: 0 },
+{ q: "Ποιο ποσοστό των αναγνωστών διαβάζει μόνο τον τίτλο ενός κειμένου;", a: ["60%", "70%", "80%", "90%"], c: 2 },
+{ q: "Ποιο εργαλείο προσφέρει heatmaps, ηχογραφήσεις συνεδριών χρηστών και δημοσκοπήσεις;", a: ["BuzzSumo", "Qualtrics", "SEMrush", "Hotjar"], c: 3 },
+{ q: "Πόσα δευτερόλεπτα διαρκεί η προσοχή της Γενιάς Z;", a: ["5 δευτερόλεπτα", "8 δευτερόλεπτα", "12 δευτερόλεπτα", "15 δευτερόλεπτα"], c: 1 },
+{ q: "Η Γενιά Z αναμένεται να αντιπροσωπεύει ποιο ποσοστό των καταναλωτών στην επόμενη διετία;", a: ["20%", "30%", "40%", "50%"], c: 2 },
+{ q: "Ποιο εργαλείο περιγράφεται ως δημοφιλές φίλτρο ανεπιθύμητης αλληλογραφίας για το WordPress;", a: ["Akismet", "Hotjar", "Hootsuite", "Typeform"], c: 0 },
+{ q: "Τι ποσοστό του παγκόσμιου πληθυσμού χρησιμοποιεί καθημερινά κοινωνικά μέσα δικτύωσης;", a: ["Πάνω από 40%", "Πάνω από 50%", "Πάνω από 60%", "Πάνω από 70%"], c: 2 },
+{ q: "Τι αναγνωρίζεται ως χαρακτηριστικό της στρατηγικής μάρκετινγκ σύμφωνα με τους Kotler και Keller (2012);", a: ["Είναι ένα βραχυπρόθεσμο σχέδιο που εφαρμόζεται μια φορά", "Αφορά αποκλειστικά τη διαφήμιση μέσω κοινωνικών δικτύων", "Στοχεύει μόνο στην αύξηση των βραχυπρόθεσμων εσόδων", "Είναι μια συνεχιζόμενη διαδικασία που απαιτεί ευελιξία και προσαρμοστικότητα"], c: 3 },
+{ q: "Ποιος είναι ο βασικός στόχος της στρατηγικής μάρκετινγκ;", a: ["Η μείωση του κόστους παραγωγής", "Η ευθυγράμμιση των πόρων και των δυνατοτήτων της επιχείρησης με τις ευκαιρίες και προκλήσεις του εξωτερικού περιβάλλοντος", "Η αύξηση του αριθμού των εργαζομένων", "Η αποκλειστική εστίαση στις διαδικτυακές πωλήσεις"], c: 1 },
+{ q: "Ποιες είναι οι τρεις κατηγορίες που περιλαμβάνει το Brand Voice;", a: ["Γλωσσικό ύφος, αξίες και προσωπικότητα, τόνος επικοινωνίας", "Γλωσσικό ύφος, αριθμός αναρτήσεων και διαφημιστικός προϋπολογισμός", "Τιμολόγηση, διανομή και προώθηση", "SEO, social media και email marketing"], c: 0 }
+];
+
+
+
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+    answered = false;
+    document.getElementById("questionCount").innerText =
+        `Ερώτηση ${current + 1} / ${quiz.length}`;
+
+    document.getElementById("question").innerText = quiz[current].q;
+
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+
+    quiz[current].a.forEach((answer, index) => {
+        const btn = document.createElement("button");
+        btn.innerText = answer;
+        btn.className = "answer-btn";
+        btn.onclick = () => checkAnswer(btn, index);
+        answersDiv.appendChild(btn);
+    });
+}
+
+function checkAnswer(button, index) {
+    if (answered) return;
+    answered = true;
+
+    const buttons = document.querySelectorAll(".answer-btn");
+
+    buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === quiz[current].c) btn.classList.add("correct");
+        if (i === index && i !== quiz[current].c) btn.classList.add("wrong");
+    });
+
+    if (index === quiz[current].c) score++;
+}
+
+function nextQuestion() {
+    if (!answered) return;
+
+    current++;
+    if (current < quiz.length) {
+        loadQuestion();
+    } else {
+        document.querySelector(".quiz-container").innerHTML = `
+            <h2>🎉 Τέλος Κουίζ</h2>
+            <p>Σκορ: <strong>${score} / ${quiz.length}</strong></p>
+            <button id="nextBtn" onclick="location.reload()">Ξεκίνα ξανά</button>
+        `;
+    }
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
